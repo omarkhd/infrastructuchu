@@ -4,6 +4,6 @@
     name: mongodb
     state: restarted
 
-- name: initiate replica set
-  command: mongo admin /opt/initiate.js
+- name: configure replica set
+  command: mongo admin /opt/replica_set.js
 

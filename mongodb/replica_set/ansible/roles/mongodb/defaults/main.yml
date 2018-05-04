@@ -1,0 +1,3 @@
+---
+configure_script: initiate.js.j2
+

@@ -25,12 +25,21 @@
     state: started
     enabled: yes
 
-- name: render replica set init script
+- name: check configure script
+  stat:
+    path: /opt/replica_set.js
+  register: config_check
+
+- name: choose configure script
+  set_fact: configure_script=reconfigure.js.j2
+  when: config_check.stat.exists
+
+- name: render replica set config script
   run_once: yes
   template:
-    src: initiate.js.j2
-    dest: /opt/initiate.js
+    src: '{{ configure_script }}'
+    dest: /opt/replica_set.js
     mode: 0644
-  notify: initiate replica set
+  notify: configure replica set
   when: '"primary" in group_names'
 

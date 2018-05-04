@@ -11,7 +11,7 @@
     changed_when: check_python.stdout != ''
 
 - name: Provision replica set nodes
-  hosts: primary:secondary
+  hosts: primary:secondary:arbiter
   become: yes
   gather_facts: yes
   roles:

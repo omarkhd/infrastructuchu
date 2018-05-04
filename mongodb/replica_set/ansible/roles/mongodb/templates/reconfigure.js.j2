@@ -1,0 +1,25 @@
+rs.reconfig({
+	"_id" : "omarkhd",
+	"members" : [
+		{
+			"_id" : 0,
+			"host" : "{{ ansible_all_ipv4_addresses|ipaddr("172.16.0.0/16")|first }}:27017",
+			"priority": 1
+		},
+		{% for host in groups.secondary %}
+			{
+				"_id" : {{ loop.index }},
+				"host" : "{{ hostvars[host].ansible_all_ipv4_addresses|ipaddr("172.16.0.0/16")|first }}:27017",
+				"priority": 0.5
+			},
+		{% endfor %}
+        {% for host in groups.arbiter %}
+            {
+                "_id": {{ loop.index + groups.secondary|length }},
+                "host": "{{ hostvars[host].ansible_all_ipv4_addresses|ipaddr("172.16.0.0/16")|first }}:27017",
+                "arbiterOnly": true
+            },
+        {% endfor %}
+	]
+}, {force: true});
+
