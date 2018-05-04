@@ -1,0 +1,9 @@
+---
+- name: restart mongodb
+  service:
+    name: mongodb
+    state: restarted
+
+- name: initiate replica set
+  command: mongo admin /opt/initiate.js
+
