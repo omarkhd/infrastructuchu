@@ -1,3 +1,4 @@
 ---
 configure_script: initiate.js.j2
+backup_delay: 86400
 

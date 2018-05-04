@@ -25,7 +25,8 @@ Vagrant.configure("2") do |config|
 					ansible.groups = {
 						primary: ["node1"],
 						secondary: ["node2", "node3", "node4"],
-						arbiter: ["node5"]
+						arbiter: ["node5"],
+						backup: ["node4"]
 					}
 				end
 			end

@@ -10,7 +10,13 @@ rs.reconfig({
 			{
 				"_id" : {{ loop.index }},
 				"host" : "{{ hostvars[host].ansible_all_ipv4_addresses|ipaddr("172.16.0.0/16")|first }}:27017",
-				"priority": 0.5
+				{% if host in groups.backup %}
+					"priority": 0,
+					"slaveDelay": {{ backup_delay }},
+					"hidden": true
+				{% else %}
+					"priority": 0.5
+				{% endif %}
 			},
 		{% endfor %}
         {% for host in groups.arbiter %}
