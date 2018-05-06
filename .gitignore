@@ -1,6 +1,9 @@
 .vagrant
+.venv
 
 *.swp
 *.log
 *.retry
+*.pyc
+*~
 

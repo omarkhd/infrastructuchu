@@ -17,3 +17,10 @@
   roles:
     - mongodb
 
+- name: Provision examples client node
+  hosts: example
+  become: yes
+  gather_facts: yes
+  roles:
+    - examples
+

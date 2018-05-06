@@ -1,0 +1,21 @@
+---
+- name: install pip3
+  apt:
+    name: python3-pip
+    state: present
+
+- name: install virtualenv package
+  pip:
+    name: virtualenv
+    executable: pip3
+    state: present
+    version: 15.2.0
+
+- name: install pip requirements
+  pip:
+    requirements: '{{ examples_basedir }}/requirements.txt'
+    virtualenv: '{{ examples_basedir }}/.venv'
+    virtualenv_python: python3
+  become: yes
+  become_user: '{{ examples_user }}'
+

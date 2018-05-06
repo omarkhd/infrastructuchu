@@ -1,0 +1,4 @@
+---
+examples_user: vagrant
+examples_basedir: /vagrant/examples
+
