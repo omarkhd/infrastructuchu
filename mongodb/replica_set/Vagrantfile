@@ -2,11 +2,12 @@
 # vi: set ft=ruby :
 
 machines = {
-	node1: { ip: "172.16.31.101" },
-	node2: { ip: "172.16.31.102" },
-	node3: { ip: "172.16.31.103" },
-	node4: { ip: "172.16.31.104" },
-	node5: { ip: "172.16.31.105" }
+	node1: { memory: 1024, ip: "172.16.31.101" },
+	node2: { memory: 512, ip: "172.16.31.102" },
+	node3: { memory: 512, ip: "172.16.31.103" },
+	node4: { memory: 512, ip: "172.16.31.104" },
+	node5: { memory: 512, ip: "172.16.31.105" },
+	node6: { memory: 512, ip: "172.16.31.106" }
 }
 
 Vagrant.configure("2") do |config|
@@ -15,7 +16,7 @@ Vagrant.configure("2") do |config|
 			node.vm.box = "ubuntu/bionic64"
 			node.vm.network "private_network", ip: attrs[:ip]
 			node.vm.provider "virtualbox" do |vbox|
-				vbox.memory = 512
+				vbox.memory = attrs[:memory]
 			end
 
 			if index == machines.size - 1
@@ -26,7 +27,8 @@ Vagrant.configure("2") do |config|
 						primary: ["node1"],
 						secondary: ["node2", "node3", "node4"],
 						arbiter: ["node5"],
-						backup: ["node4"]
+						backup: ["node4"],
+						example: ["node6"]
 					}
 				end
 			end
