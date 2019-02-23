@@ -1,0 +1,4 @@
+- debug:
+    msg: This is the shared system role
+  tags: [system]
+

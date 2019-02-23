@@ -1,0 +1,20 @@
+[Unit]
+Description=Apache ZooKeeper
+Documentation=https://zookeeper.apache.org
+Requires=network.target
+After=network.target
+
+[Service]
+User=root
+Group=root
+Type=forking
+PIDFile=/var/lib/zookeeper/zookeeper_server.pid
+ExecStart=/opt/zookeeper/zookeeper-3.4.13/bin/zkServer.sh start /etc/zookeeper.cfg
+ExecStop=/opt/zookeeper/zookeeper-3.4.13/bin/zkServer.sh stop /etc/zookeeper.cfg
+ExecReload=/opt/zookeeper/zookeeper-3.4.13/bin/zkServer.sh restart /etc/zookeeper.cfg
+WorkingDirectory=/opt/zookeeper/zookeeper-3.4.13
+Environment=ZOO_LOG_DIR=/var/log
+
+[Install]
+WantedBy=default.target
+

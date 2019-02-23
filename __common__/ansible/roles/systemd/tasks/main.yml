@@ -1,0 +1,43 @@
+---
+- name: ensure system is installed
+  apt:
+    name: systemd
+    state: latest
+  tags: [systemd]
+
+- name: copy services configuration files
+  copy:
+    src: '{{ item }}'
+    remote_src: yes
+    dest: /etc/systemd/system/{{ item|basename }}
+  with_items: '{{ service_files }}'
+  tags: [systemd]
+
+- name: start and enable services
+  systemd:
+    name: '{{ item|basename }}'
+    state: restarted
+    enabled: yes
+    daemon_reload: yes
+  with_items: '{{ service_files }}'
+  tags: [systemd]
+
+- name: touch final syslog logging files
+  file:
+    path: /var/log/{{ item|basename }}.log
+    state: touch
+    owner: syslog
+    group: adm
+  with_items: '{{ service_files }}'
+  tags: [systemd]
+
+- name: configure rsyslog for services
+  copy:
+    content: |
+      if $programname == '{{ item|basename }}' then /var/log/{{ item|basename }}.log
+      if $programname == '{{ item|basename }}' then stop
+    dest: /etc/rsyslog.d/{{ item|basename }}.conf
+  with_items: '{{ service_files }}'
+  notify: restart rsyslog
+  tags: [system]
+

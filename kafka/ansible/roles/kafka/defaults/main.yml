@@ -1,0 +1,3 @@
+---
+zookeeper_host: '{{ hostvars["node2"]["ansible_all_ipv4_addresses"][1] }}'
+

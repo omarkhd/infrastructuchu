@@ -1,0 +1,36 @@
+---
+- name: download binary
+  get_url:
+    dest: /var/tmp/zookeeper-3.4.13.tar.gz
+    url: https://www-eu.apache.org/dist/zookeeper/zookeeper-3.4.13/zookeeper-3.4.13.tar.gz
+  tags: [zookeeper]
+
+- name: create needed directories
+  file:
+    path: '{{ item }}'
+    state: directory
+  with_items:
+    - /opt/zookeeper
+    - /var/lib/zookeeper
+    - var/log/zookeeper
+  tags: [zookeeper]
+
+- name: unarchive package
+  unarchive:
+    src: /var/tmp/zookeeper-3.4.13.tar.gz
+    dest: /opt/zookeeper
+    remote_src: yes
+  tags: [zookeeper]
+
+- name: render config file
+  template:
+    src: zookeeper.cfg.j2
+    dest: /etc/zookeeper.cfg
+  tags: [zookeeper]
+
+- name: render service file
+  template:
+    src: zookeeper.service.j2
+    dest: /var/tmp/zookeeper.service
+  tags: [zookeeper]
+  
