@@ -1,0 +1,104 @@
+---
+#- debug:
+#    msg: '{{ item | basename }}'
+#  with_items:
+#    - https://github.com/prometheus/alertmanager/releases/download/v0.16.1/alertmanager-0.16.1.linux-amd64.tar.gz
+#  tags: [prometheus]
+
+- name: download binaries
+  get_url:
+    url: '{{ item }}'
+    dest: /var/tmp/{{ item | basename }}
+  with_items:
+    - https://github.com/prometheus/prometheus/releases/download/v2.7.1/prometheus-2.7.1.linux-amd64.tar.gz
+    - https://github.com/prometheus/alertmanager/releases/download/v0.16.1/alertmanager-0.16.1.linux-amd64.tar.gz
+  tags: [prometheus]
+
+
+- name: unarchive packages
+  unarchive:
+    src: /var/tmp/{{ item }}
+    dest: /opt/prometheus
+    remote_src: yes
+    owner: prometheus
+    group: prometheus
+  with_items:
+    - prometheus-2.7.1.linux-amd64.tar.gz
+    - alertmanager-0.16.1.linux-amd64.tar.gz
+  tags: [prometheus]
+
+- name: create needed directories
+  file:
+    state: directory
+    dest: '{{ item }}'
+    owner: prometheus
+    group: prometheus
+  with_items:
+    - /etc/prometheus
+    - /var/lib/prometheus
+    - /var/lib/prometheus/tsdb
+    #- { path: "/data", owner: "root" }
+    #- path: /data/prometheus
+    #- path: /data/prometheus/tsdb
+    #- path: /data/prometheus/targets
+    #- path: /data/prometheus/rules
+    #- path: /data/prometheus/rules/alerts
+    #- path: /data/prometheus/alertmanager
+    #- path: /data/prometheus/alertmanager/data
+    #- path: /data/prometheus/alertmanager/templates
+  tags: [prometheus]
+
+#- name: render targets file sd configs
+#  copy:
+#    src: targets/{{ item }}
+#    dest: /data/prometheus/targets/{{ item }}
+#    owner: prometheus
+#    group: prometheus
+#  tags: [prometheus]
+#  with_items: '{{ global_prometheus_targets }} + {{ prometheus_targets }}'
+#
+#- name: render alert rules files
+#  copy:
+#    src: rules/alerts/{{ item }}
+#    dest: /data/prometheus/rules/alerts/{{ item }}
+#    owner: prometheus
+#    group: prometheus
+#  tags: [prometheus]
+#  with_items: '{{ global_prometheus_alerts }} + {{ prometheus_alerts }}'
+
+- name: render prometheus configuration file
+  template:
+    src: prometheus.yml.j2
+    dest: /etc/prometheus/prometheus.yml
+    owner: prometheus
+    group: prometheus
+  tags: [prometheus]
+
+#- name: render alertmanager configuration file
+#  template:
+#    src: alertmanager.yml.j2
+#    dest: /data/prometheus/alertmanager/alertmanager.yml
+#    owner: prometheus
+#    group: prometheus
+#  tags: [prometheus]
+#
+#- name: alert alertmanager slack template
+#  copy:
+#    src: templates/slack.tmpl
+#    dest: /data/prometheus/alertmanager/templates/slack.tmpl
+#    owner: prometheus
+#    group: prometheus
+#  tags: [prometheus]
+
+- name: render systemd service file
+  template:
+    src: prometheus.service.j2
+    dest: /var/tmp/prometheus.service
+  tags: [prometheus]
+
+#- name: render alertmanager systemd service file
+#  template:
+#    src: alertmanager.service.j2
+#    dest: /var/tmp/alertmanager.service
+#  tags: [prometheus]
+

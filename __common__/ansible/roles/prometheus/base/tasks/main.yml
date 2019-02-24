@@ -1,0 +1,27 @@
+---
+- name: create system group
+  group:
+    name: prometheus
+    state: present
+    system: yes
+  tags: [prometheus/base]
+
+- name: create prometheus user
+  user:
+    name: prometheus
+    state: present
+    create_home: no
+    group: prometheus
+    system: yes
+  tags: [prometheus/base]
+
+- name: create needed directories
+  file:
+    path: '{{ item }}'
+    state: directory
+    owner: prometheus
+    group: prometheus
+  with_items:
+    - /opt/prometheus
+  tags: [prometheus/base]
+

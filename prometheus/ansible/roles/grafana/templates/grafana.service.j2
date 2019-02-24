@@ -1,0 +1,17 @@
+[Unit]
+Description=Grafana
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=grafana
+WorkingDirectory=/opt/grafana/grafana-5.4.3
+ExecStart=/opt/grafana/grafana-5.4.3/bin/grafana-server --config=/etc/grafana.ini
+SyslogIdentifier=grafana.service
+
+[Install]
+WantedBy=multi-user.target
+

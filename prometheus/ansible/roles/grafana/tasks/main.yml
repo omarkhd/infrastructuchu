@@ -1,0 +1,88 @@
+---
+- name: create grafana system group
+  group:
+    name: grafana
+    state: present
+    system: yes
+  tags: [grafana]
+
+- name: create grafana user
+  user:
+    name: grafana
+    state: present
+    group: grafana
+    system: yes
+    create_home: no
+  tags: [grafana]
+
+- name: create needed directories
+  file:
+    state: directory
+    dest: '{{ item }}'
+    owner: grafana
+    group: grafana
+  with_items:
+    - /opt/grafana
+    - /var/lib/grafana
+    - /var/lib/grafana/storage
+    - /var/lib/grafana/provisioning
+    - /var/lib/grafana/provisioning/datasources
+    - /var/lib/grafana/provisioning/dashboards
+    - /var/lib/grafana/dashboards
+  tags: [grafana]
+
+- name: download binaries
+  get_url:
+    url: https://dl.grafana.com/oss/release/grafana-5.4.3.linux-amd64.tar.gz
+    dest: /var/tmp/grafana-5.4.3.linux-amd64.tar.gz
+  tags: [grafana]
+
+- name: unarchive service binaries
+  unarchive:
+    src: /var/tmp/grafana-5.4.3.linux-amd64.tar.gz
+    dest: /opt/grafana
+    remote_src: yes
+    owner: grafana
+    group: grafana
+  tags: [grafana]
+
+- name: render configuration file
+  template:
+    src: grafana.ini.j2
+    dest: /etc/grafana.ini
+    owner: grafana
+    group: grafana
+  tags: [grafana]
+
+- name: render provisioned prometheus datasource
+  template:
+    src: provisioning/datasources/prometheus.yml.j2
+    dest: /var/lib/grafana/provisioning/datasources/prometheus.yml
+    owner: grafana
+    group: grafana
+  tags: [grafana]
+
+- name: render default dashboards provider configuration
+  template:
+    src: provisioning/dashboards/providers.yml.j2
+    dest: /var/lib/grafana/provisioning/dashboards/providers.yml
+    owner: grafana
+    group: grafana
+  tags: [grafana]
+
+- name: render dashdoards
+  copy:
+    src: dashboards/{{ item }}
+    dest: /var/lib/grafana/dashboards/{{ item }}
+    owner: grafana
+    group: grafana
+  tags: [grafana]
+  with_items:
+    - prometheus.json
+
+- name: render systemd service file
+  template:
+    src: grafana.service.j2
+    dest: /var/tmp/grafana.service
+  tags: [grafana]
+

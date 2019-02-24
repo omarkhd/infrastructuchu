@@ -1,0 +1,21 @@
+---
+- name: download binaries
+  get_url:
+    url: https://github.com/prometheus/node_exporter/releases/download/v0.17.0/node_exporter-0.17.0.linux-amd64.tar.gz
+    dest: /var/tmp/node_exporter-0.17.0.linux-amd64.tar.gz
+  tags: [prometheus/node_exporter]
+
+- name: unarchive package
+  unarchive:
+    src: /var/tmp/node_exporter-0.17.0.linux-amd64.tar.gz
+    dest: /opt/prometheus
+    remote_src: yes
+    owner: prometheus
+    group: prometheus
+  tags: [prometheus/node_exporter]
+
+- name: render systemd service file
+  template:
+    src: node_exporter.service.j2
+    dest: /var/tmp/node_exporter.service
+

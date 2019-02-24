@@ -1,0 +1,17 @@
+[Unit]
+Description=Prometheus
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=prometheus
+WorkingDirectory=/opt/prometheus/prometheus-2.7.1.linux-amd64
+ExecStart=/opt/prometheus/prometheus-2.7.1.linux-amd64/prometheus --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/var/lib/prometheus/tsdb
+SyslogIdentifier=prometheus.service
+
+[Install]
+WantedBy=multi-user.target
+

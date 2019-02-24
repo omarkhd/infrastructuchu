@@ -1,0 +1,20 @@
+[paths]
+data = /var/lib/grafana/storage
+provisioning = /var/lib/grafana/provisioning
+
+[log]
+mode = console
+
+[database]
+type = sqlite3
+
+[users]
+default_theme = light
+
+[auth.basic]
+enabled = false
+
+[auth.anonymous]
+enabled = true
+org_role = Admin
+
