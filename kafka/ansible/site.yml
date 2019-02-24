@@ -14,7 +14,7 @@
   become: yes
   gather_facts: yes
   roles:
-    - system
+    - common/system
     - java
 
 - hosts: zookeeper
@@ -22,7 +22,7 @@
   gather_facts: yes
   roles:
     - zookeeper
-    - role: systemd
+    - role: common/systemd
       service_files:
         - /var/tmp/zookeeper.service
 
@@ -31,7 +31,7 @@
   gather_facts: yes
   roles:
     - kafka
-    - role: systemd
+    - role: common/systemd
       service_files:
         - /var/tmp/kafka.service
 
