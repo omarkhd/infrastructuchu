@@ -1,0 +1,27 @@
+---
+- name: install required packages
+  apt: name=xfsprogs
+  tags: [filesystem]
+
+- name: make filesystem for data volume
+  filesystem:
+    fstype: '{{ fstype }}'
+    dev: '{{ device_path }}'
+  tags: [filesystem]
+
+- name: discover data volume uuid
+  command: blkid -s UUID -o value {{ device_path }}
+  register: device_uuid
+  changed_when: no
+  tags: [filesystem]
+
+- name: ensure data volume is mounted
+  mount:
+    name: '{{ mount_path }}'
+    src: UUID={{ device_uuid.stdout }}
+    fstype: '{{ fstype }}'
+    opts: defaults,nofail
+    dump: '0'
+    passno: '2'
+    state: mounted
+  tags: [filesystem]

@@ -1,0 +1,4 @@
+---
+fstype: xfs
+device_path: /dev/dummy
+mount_path: /mount/dummy

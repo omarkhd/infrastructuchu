@@ -1,0 +1,52 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+ENV['VAGRANT_DEFAULT_PROVIDER'] = 'virtualbox'
+
+machines = {
+	node1: { memory: 512, ip: "172.24.1.2" },
+	node2: { memory: 512, ip: "172.24.1.3" },
+	node3: { memory: 512, ip: "172.24.1.4" }
+}
+
+Vagrant.configure("2") do |config|
+	machines.each_with_index do |(hostname, attrs), index|
+		config.vm.define hostname do |node|
+			node.vm.box = "ubuntu/bionic64"
+			node.vm.network "private_network", ip: attrs[:ip]
+
+			node.vm.provider "virtualbox" do |vbox|
+				# Creating an extra disk.
+				filename = "./#{hostname}hd.vdi"
+				unless File.exists?(filename)
+					vbox.customize [
+						"createhd",
+						"--filename", filename,
+						"--size", 1024 * 10
+					]
+					vbox.customize [
+						"storageattach", :id,
+						"--storagectl", "SCSI",
+						"--port", 2,
+						"--device", 0,
+						"--type", "hdd",
+						"--medium", filename
+					]
+				end
+				# Other settings.
+				vbox.memory = attrs[:memory]
+				vbox.cpus = 2
+			end
+
+			if index == machines.size - 1
+				config.vm.provision "ansible" do |ansible|
+					ansible.limit = "all"
+					ansible.playbook = "ansible/site.yml"
+					ansible.groups = {}
+					ansible.raw_arguments = ENV['ANSIBLE_ARGS']
+				end
+			end
+		end
+	end
+end
+

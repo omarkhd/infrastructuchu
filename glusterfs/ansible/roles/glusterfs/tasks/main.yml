@@ -1,0 +1,18 @@
+---
+- name: add ppa repository
+  apt_repository:
+    repo: ppa:gluster/glusterfs-6
+    state: present
+  tags: [glusterfs]
+
+- name: install glusterfs server
+  apt:
+    name: glusterfs-server
+    state: latest
+  tags: [glusterfs]
+
+- name: generate /etc/hosts file
+  template:
+    src: hosts.j2
+    dest: /etc/hosts
+  tags: [glusterfs]
