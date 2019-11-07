@@ -2,3 +2,28 @@
     msg: This is the shared system role
   tags: [system]
 
+- name: install ntp
+  apt:
+    name: ntp
+    state: latest
+  tags: [system]
+
+- name: configure ntp
+  copy:
+    src: ntp.conf
+    dest: /etc/ntp.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart ntp
+  tags: [system]
+
+- meta: flush_handlers
+  tags: [system]
+
+- name: enable ntp service
+  service:
+    name: ntp
+    enabled: yes
+  tags: [system]
+
