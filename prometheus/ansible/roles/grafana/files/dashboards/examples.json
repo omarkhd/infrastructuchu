@@ -15,32 +15,47 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
+  "iteration": 1573187910599,
   "links": [],
   "panels": [
     {
-      "aliasColors": {
-        "Buffers/Cached": "#7eb26d",
-        "Used": "#f9ba8f"
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
       },
+      "id": 2,
+      "panels": [],
+      "title": "Counters",
+      "type": "row"
+    },
+    {
+      "aliasColors": {},
       "bars": false,
       "dashLength": 10,
       "dashes": false,
       "fill": 1,
       "gridPos": {
-        "h": 8,
+        "h": 7,
         "w": 12,
         "x": 0,
-        "y": 0
+        "y": 1
       },
-      "id": 10,
+      "id": 4,
       "legend": {
-        "avg": false,
+        "alignAsTable": true,
+        "avg": true,
         "current": false,
         "max": false,
         "min": false,
+        "rightSide": true,
         "show": true,
+        "sort": null,
+        "sortDesc": null,
         "total": false,
-        "values": false
+        "values": true
       },
       "lines": true,
       "linewidth": 1,
@@ -52,29 +67,22 @@
       "renderer": "flot",
       "seriesOverrides": [],
       "spaceLength": 10,
-      "stack": false,
+      "stack": true,
       "steppedLine": false,
       "targets": [
         {
-          "expr": "1 - (node_memory_MemAvailable_bytes{job=\"prometheus_vm\"} / node_memory_MemTotal_bytes{job=\"prometheus_vm\"})",
+          "expr": "sum by (zone) (rate(examples_requests_total{zone=~\"$zone\"}[30s]))",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "Used",
-          "refId": "B"
-        },
-        {
-          "expr": "(node_memory_Buffers_bytes{job=\"prometheus_vm\"} + node_memory_Cached_bytes{job=\"prometheus_vm\"}) / node_memory_MemTotal_bytes{job=\"prometheus_vm\"}",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "Buffers/Cached",
-          "refId": "C"
+          "legendFormat": "{{zone}}",
+          "refId": "A"
         }
       ],
       "thresholds": [],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Memory Usage",
+      "title": "RPS / Zone",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -90,10 +98,10 @@
       },
       "yaxes": [
         {
-          "format": "percentunit",
-          "label": "",
+          "format": "short",
+          "label": null,
           "logBase": 1,
-          "max": "1",
+          "max": null,
           "min": "0",
           "show": true
         },
@@ -116,22 +124,114 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "fill": 1,
+      "fill": 0,
       "gridPos": {
-        "h": 8,
+        "h": 7,
         "w": 12,
         "x": 12,
-        "y": 0
+        "y": 1
+      },
+      "id": 6,
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": false,
+        "max": false,
+        "min": false,
+        "rightSide": true,
+        "show": true,
+        "sort": null,
+        "sortDesc": null,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum by (endpoint) (rate(examples_requests_total{zone=~\"$zone\"}[30s]))",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "legendFormat": "{{endpoint}}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "RPS / Endpoint",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "fill": 0,
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 8
       },
       "id": 8,
       "legend": {
-        "avg": false,
+        "alignAsTable": true,
+        "avg": true,
         "current": false,
         "max": false,
         "min": false,
+        "rightSide": true,
         "show": true,
+        "sort": null,
+        "sortDesc": null,
         "total": false,
-        "values": false
+        "values": true
       },
       "lines": true,
       "linewidth": 1,
@@ -147,11 +247,10 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "1 - irate(node_cpu_seconds_total{job=\"prometheus_vm\", mode=\"idle\"}[5m])",
+          "expr": "sum by (host) (rate(examples_requests_total{zone=~\"$zone\"}[30s]))",
           "format": "time_series",
-          "instant": false,
           "intervalFactor": 1,
-          "legendFormat": "vCPU {{ cpu }}",
+          "legendFormat": "{{host}}",
           "refId": "A"
         }
       ],
@@ -159,7 +258,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "CPU Usage",
+      "title": "RPS / Host",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -175,12 +274,11 @@
       },
       "yaxes": [
         {
-          "decimals": null,
-          "format": "percentunit",
+          "format": "short",
           "label": null,
           "logBase": 1,
-          "max": "1",
-          "min": "0",
+          "max": null,
+          "min": null,
           "show": true
         },
         {
@@ -198,196 +296,84 @@
       }
     },
     {
-      "aliasColors": {
-        "/data": "#65c5db",
-        "Total in /": "#629e51",
-        "Total in /data": "#e0f9d7",
-        "Used in /": "#f9934e",
-        "Used in /data": "#629e51"
-      },
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "fill": 1,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 8
-      },
-      "id": 16,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "(node_filesystem_size_bytes{job=\"prometheus_vm\", mountpoint=~\"/|/data\"} - node_filesystem_avail_bytes{job=\"prometheus_vm\", mountpoint=~\"/|/data\"})\n/ (node_filesystem_size_bytes{job=\"prometheus_vm\", mountpoint=~\"/|/data\"})",
-          "format": "time_series",
-          "hide": false,
-          "instant": false,
-          "intervalFactor": 1,
-          "legendFormat": "{{ mountpoint }}",
-          "refId": "A"
-        }
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
       ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Disk Usage",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
+      "decimals": 2,
+      "format": "rps",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
       },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "percentunit",
-          "label": null,
-          "logBase": 1,
-          "max": "1",
-          "min": "0",
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "fill": 1,
       "gridPos": {
-        "h": 8,
+        "h": 7,
         "w": 12,
         "x": 12,
         "y": 8
       },
-      "id": 2,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
+      "id": 10,
+      "interval": null,
       "links": [],
-      "nullPointMode": "null",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
       "targets": [
         {
-          "expr": "process_resident_memory_bytes{job=\"prometheus\"}",
+          "expr": "sum (rate(examples_requests_total{zone=~\"$zone\"}[30s]))",
           "format": "time_series",
-          "hide": false,
           "intervalFactor": 1,
-          "legendFormat": "Prometheus",
           "refId": "A"
-        },
-        {
-          "expr": "process_resident_memory_bytes{job=\"grafana\"}",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "Grafana",
-          "refId": "B"
-        },
-        {
-          "expr": "process_resident_memory_bytes{job=\"prometheus_vm\"}",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "Node Exporter",
-          "refId": "C"
         }
       ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Services Memory Usage",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "transparent": false,
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
+      "thresholds": "",
+      "title": "Current Rate",
+      "type": "singlestat",
+      "valueFontSize": "200%",
+      "valueMaps": [
         {
-          "format": "decbytes",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": "0",
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
         }
       ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
+      "valueName": "current"
     }
   ],
   "refresh": "5s",
@@ -395,10 +381,65 @@
   "style": "dark",
   "tags": [],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "allValue": null,
+        "current": {
+          "tags": [],
+          "text": "All",
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": "Prometheus",
+        "definition": "label_values(examples_requests_total, zone)",
+        "hide": 0,
+        "includeAll": true,
+        "label": null,
+        "multi": true,
+        "name": "zone",
+        "options": [
+          {
+            "selected": true,
+            "text": "All",
+            "value": "$__all"
+          },
+          {
+            "selected": false,
+            "text": "abc1",
+            "value": "abc1"
+          },
+          {
+            "selected": false,
+            "text": "abc2",
+            "value": "abc2"
+          },
+          {
+            "selected": false,
+            "text": "xyz1",
+            "value": "xyz1"
+          },
+          {
+            "selected": false,
+            "text": "xyz2",
+            "value": "xyz2"
+          }
+        ],
+        "query": "label_values(examples_requests_total, zone)",
+        "refresh": 0,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      }
+    ]
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-5m",
     "to": "now"
   },
   "timepicker": {
@@ -427,8 +468,8 @@
     ]
   },
   "timezone": "",
-  "title": "Prometheus Stack",
-  "uid": "tU7sirfik",
-  "version": 1
+  "title": "Examples",
+  "uid": "wlCWrV1Zk",
+  "version": 2
 }
 

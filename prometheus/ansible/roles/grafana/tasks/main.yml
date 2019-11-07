@@ -79,6 +79,7 @@
   tags: [grafana]
   with_items:
     - prometheus.json
+    - examples.json
 
 - name: render systemd service file
   template:

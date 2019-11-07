@@ -3,19 +3,35 @@
 
 ENV['VAGRANT_DEFAULT_PROVIDER'] = "virtualbox"
 
-Vagrant.configure("2") do |config|
-	config.vm.box = "ubuntu/bionic64"
-	config.vm.network "private_network", ip: "172.24.0.2"
-	config.vm.provider "virtualbox"  do |vbox|
-		vbox.memory = 1536
-	end
+MACHINES = {
+	node01: { memory: 1536, ip: "172.24.0.2" },
+	node02: { memory: 512, ip: "172.24.0.3" }
+}
 
-	config.vm.provision "ansible" do |ansible|
-		ansible.playbook = "ansible/site.yml"
-		ansible.groups = {
-			prometheus: "default"
-		}
-		ansible.raw_arguments = ENV['ANSIBLE_ARGS']
+Vagrant.configure("2") do |config|
+	MACHINES.each_with_index do |(hostname, attrs), index|
+		config.vm.define hostname do |node|
+			node.vm.box = "ubuntu/bionic64"
+			node.vm.network "private_network", ip: attrs[:ip]
+			node.vm.provider "virtualbox" do |vbox|
+				vbox.memory = attrs[:memory]
+			end
+
+			if index == MACHINES.size - 1
+				config.vm.provision "ansible" do |ansible|
+					ansible.limit = "all"
+					ansible.playbook = "ansible/site.yml"
+					ansible.groups = {
+						prometheus: ["node01"],
+						examples: ["node02"]
+					}
+					ansible.raw_arguments = ENV['ANSIBLE_ARGS']
+					ansible.extra_vars = {
+						examples_target: MACHINES[:node02][:ip] + ":5100"
+					}
+				end
+			end
+		end
 	end
 end
 

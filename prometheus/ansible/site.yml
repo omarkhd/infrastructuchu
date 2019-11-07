@@ -22,11 +22,22 @@
   roles:
     - common/prometheus/base
     - common/prometheus/node_exporter
-    - prometheus
+    - role: prometheus
+      extra_targets:
+        - job_name: examples
+          static_configs:
+            - targets:
+                - "{{ examples_target }}"
     - grafana
     - role: common/systemd
       service_files:
         - /var/tmp/node_exporter.service
         - /var/tmp/prometheus.service
         - /var/tmp/grafana.service
+
+- hosts: examples
+  become: yes
+  gather_facts: yes
+  roles:
+    - common/docker
 
