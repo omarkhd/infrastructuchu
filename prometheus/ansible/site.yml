@@ -24,10 +24,14 @@
     - common/prometheus/node_exporter
     - role: prometheus
       extra_targets:
+        - job_name: examples_vm
+          static_configs:
+            - targets:
+                - "{{ examples_vm_addr }}:9100"
         - job_name: examples
           static_configs:
             - targets:
-                - "{{ examples_target }}"
+                - "{{ examples_vm_addr }}:5100"
     - grafana
     - role: common/systemd
       service_files:
@@ -39,5 +43,10 @@
   become: yes
   gather_facts: yes
   roles:
+    - common/prometheus/base
+    - common/prometheus/node_exporter
     - common/docker
+    - role: common/systemd
+      service_files:
+        - /var/tmp/node_exporter.service
 

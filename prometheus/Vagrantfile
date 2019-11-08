@@ -27,7 +27,7 @@ Vagrant.configure("2") do |config|
 					}
 					ansible.raw_arguments = ENV['ANSIBLE_ARGS']
 					ansible.extra_vars = {
-						examples_target: MACHINES[:node02][:ip] + ":5100"
+						examples_vm_addr: MACHINES[:node02][:ip]
 					}
 				end
 			end

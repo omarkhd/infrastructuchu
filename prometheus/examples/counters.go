@@ -11,7 +11,7 @@ func (e *examples) emitCounters() {
 	rand.Seed(time.Now().UnixNano())
 	endpoints := []string{"one", "two", "three", "four", "five"}
 	zones := []string{"abc1", "abc2", "xyz1", "xyz2"}
-	var hosts [120]map[string]string
+	var hosts [85]map[string]string
 	for i := 0; i < len(hosts); i++ {
 		random := rand.Int()
 		name := fmt.Sprintf("host%02d", i+1)
@@ -25,7 +25,7 @@ func (e *examples) emitCounters() {
 	log.Printf("Faking requests for %d hosts and %d endpoints", len(hosts), len(endpoints))
 	for _, host := range hosts {
 		for i, endpoint := range endpoints {
-			waitModulo := i*10 + 3
+			waitModulo := i*5 + 1
 			go func(h map[string]string, ep string, m int) {
 				for {
 					random := rand.Int()
