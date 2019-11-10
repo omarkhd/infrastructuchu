@@ -1,0 +1,56 @@
+---
+- name: get deb package
+  get_url:
+    url: https://artifacts.elastic.co/downloads/kibana/kibana-7.5.1-amd64.deb
+    dest: /var/tmp/kibana-7.5.1-amd64.deb
+  tags: [kibana]
+
+- name: install package
+  apt:
+    deb: /var/tmp/kibana-7.5.1-amd64.deb
+  tags: [kibana]
+
+- name: touch logs file
+  copy:
+    content: ""
+    dest: /var/log/kibana.log
+    force: no
+    owner: kibana
+    group: kibana
+  tags: [kibana]
+
+- name: render configuration file
+  copy:
+    src: kibana.yml
+    dest: /etc/kibana/kibana.yml
+    mode: 0644
+    owner: root
+    group: root
+  notify: restart kibana
+  tags: [kibana]
+
+- meta: flush_handlers
+  tags: [kibana]
+
+- name: enable service
+  service:
+    name: kibana
+    enabled: yes
+  tags: [kibana]
+
+- name: ensure service is running
+  service:
+    name: kibana
+    state: started
+  tags: [kibana]
+
+# TODO
+#- name: wait for readiness
+#  uri:
+#   url: "http://127.0.0.1:8080/ABC"
+#    status_code: 200
+#  register: result
+#  until: result.status == 200
+#  retries: 60
+#  delay: 1
+

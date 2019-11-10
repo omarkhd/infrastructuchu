@@ -1,0 +1,6 @@
+---
+filebeat_paths:
+  - /var/log/*.log
+filebeat_elasticsearch: localhost:9200
+filebeat_modules: []
+

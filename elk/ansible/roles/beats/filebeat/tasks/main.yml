@@ -1,0 +1,47 @@
+---
+- name: get deb package
+  get_url:
+    url: https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-7.5.1-amd64.deb
+    dest: /var/tmp/filebeat-7.5.1-amd64.deb
+  tags: [filebeat]
+
+- name: install package
+  apt:
+    deb: /var/tmp/filebeat-7.5.1-amd64.deb
+  tags: [filebeat]
+
+- name: render config file
+  template:
+    src: filebeat.yml.j2
+    dest: /etc/filebeat/filebeat.yml
+    mode: 0600
+  notify:
+    # TODO: - filebeat setup
+    - restart filebeat
+  tags: [filebeat]
+
+#- meta: flush_handlers
+#  tags: [filebeat]
+
+- name: enable service
+  service:
+    name: filebeat
+    enabled: yes
+  tags: [filebeat]
+
+- name: ensure service is running
+  service:
+    name: filebeat
+    state: started
+  tags: [filebeat]
+
+- name: enable modules
+  register: enable_modules
+  shell: filebeat modules enable {{ item }}
+  with_items: "{{ filebeat_modules }}"
+  changed_when: "not enable_modules.stdout.endswith('is already enabled')"
+  notify:
+    - filebeat setup
+    - restart filebeat
+  tags: [filebeat]
+

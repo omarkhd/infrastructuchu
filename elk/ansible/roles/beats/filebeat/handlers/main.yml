@@ -1,0 +1,10 @@
+---
+- name: restart filebeat
+  service:
+    name: filebeat
+    state: restarted
+  tags: [filebeat]
+
+- name: filebeat setup
+  shell: filebeat setup
+

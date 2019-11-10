@@ -1,0 +1,40 @@
+---
+- name: install required packages
+  apt:
+    name:
+      - apt-transport-https
+      - openjdk-8-jdk
+    state: latest
+  tags: [logstash]
+
+- name: add apt gpg key
+  apt_key:
+    url: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+    state: present
+  tags: [logstash]
+
+- name: add repository definition
+  copy:
+    content: deb https://artifacts.elastic.co/packages/7.x/apt stable main
+    dest: /etc/apt/sources.list.d/elastic-7.x.list
+  tags: [logstash]
+
+- name: install service
+  apt:
+    name: logstash
+    state: latest
+    update_cache: yes
+  tags: [logstash]
+
+- name: enable service
+  service:
+    name: logstash
+    enabled: yes
+  tags: [logstash]
+
+- name: ensure service is running
+  service:
+    name: logstash
+    state: started
+  tags: [logstash]
+
