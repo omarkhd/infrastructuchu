@@ -1,0 +1,93 @@
+---
+- name: add mesosphere repository
+  yum:
+    name: http://repos.mesosphere.com/el/7/noarch/RPMS/mesosphere-el-repo-7-2.noarch.rpm
+    state: present
+  tags: [mesos]
+
+- name: install zookeeper
+  yum:
+    name: mesosphere-zookeeper
+    state: present
+  when: "'master' in group_names"
+  tags: [mesos]
+
+- name: install mesos
+  yum:
+    name: mesos
+    state: present
+  tags: [mesos]
+
+- name: render mesos/zk file
+  template:
+    src: zk.j2
+    dest: /etc/mesos/zk
+  notify:
+    - restart mesos master
+    - restart mesos slave
+  tags: [mesos]
+
+- name: render zookeeper id
+  copy:
+    content: "{{ zookeeper_id }}"
+    dest: /etc/zookeeper/conf/myid
+  notify: restart zookeeper
+  when: "'master' in group_names"
+  tags: [mesos]
+
+- name: render zookeeper cfg
+  template:
+    src: zoo.cfg.j2
+    dest: /etc/zookeeper/conf/zoo.cfg
+  notify: restart zookeeper
+  when: "'master' in group_names"
+  tags: [mesos]
+
+- name: render quorum value
+  copy:
+    content: "{{ mesos_quorum }}"
+    dest: /etc/mesos-master/quorum
+  notify: restart mesos master
+  when: "'master' in group_names"
+  tags: [mesos]
+
+- name: configure mesos ip and hostname
+  copy:
+    content: "{{ mesos_listen_ip }}"
+    dest: /etc/mesos-{{ "master" if "master" in group_names else "slave" }}/{{ item }}
+  loop:
+    - ip
+    - hostname
+  notify:
+    - restart mesos master
+    - restart mesos slave
+  tags: [mesos]
+
+- name: target state for master nodes
+  service:
+    name: "{{ item.service }}"
+    enabled: "{{ item.belong }}"
+    state: "{{ 'started' if item.belong else 'stopped' }}"
+  loop:
+    - service: zookeeper
+      belong: yes
+    - service: mesos-master
+      belong: yes
+    - service: mesos-slave
+      belong: no
+  when: "'master' in group_names"
+  tags: [mesos]
+
+- name: target state for slave nodes
+  service:
+    name: "{{ item.service }}"
+    enabled: "{{ item.belong }}"
+    state: "{{ 'started' if item.belong else 'stopped' }}"
+  loop:
+    - service: mesos-master
+      belong: no
+    - service: mesos-slave
+      belong: yes
+  when: "'slave' in group_names"
+  tags: [mesos]
+

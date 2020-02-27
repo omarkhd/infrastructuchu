@@ -2,7 +2,8 @@
 | address space  | project             |
 +----------------+---------------------+
 | 172.16.31.0/24 | mongodb/replica_set |
-| 172.16.32.0/24 | mesos/multinode     |
 | 172.24.0.0/24  | prometheus          |
+| 172.24.1.0/24  | mesos/singlenode    |
+| 172.24.2.0/24  | mesos/multinode     |
 +----------------+---------------------+
 

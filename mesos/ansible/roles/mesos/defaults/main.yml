@@ -1,0 +1,6 @@
+---
+mesos_master_ip: 127.0.0.1
+mesos_listen_ip: 127.0.0.1
+mesos_quorum: 0
+zookeeper_id: 0
+

@@ -1,0 +1,19 @@
+---
+- name: restart zookeeper
+  service:
+    name: zookeeper
+    state: restarted
+  when: "'master' in group_names"
+
+- name: restart mesos master
+  service:
+    name: mesos-master
+    state: restarted
+  when: "'master' in group_names"
+
+- name: restart mesos slave
+  service:
+    name: mesos-slave
+    state: restarted
+  when: "'slave' in group_names"
+

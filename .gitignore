@@ -3,9 +3,10 @@
 .idea
 
 *.iml
-*.swp
 *.log
-*.retry
 *.pyc
+*.retry
+*.swp
+*.vdi
 *~
 
