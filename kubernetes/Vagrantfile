@@ -1,0 +1,45 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+ENV['VAGRANT_DEFAULT_PROVIDER'] = "virtualbox"
+
+MACHINES = {
+	node01: { memory: 2048, ip: "172.24.3.2" },
+	node02: { memory: 1024, ip: "172.24.3.3" },
+	node03: { memory: 1024, ip: "172.24.3.4" },
+	node04: { memory: 1024, ip: "172.24.3.5" }
+}
+
+Vagrant.configure("2") do |config|
+	MACHINES.each_with_index do |(hostname, attrs), index|
+		config.vm.define hostname do |node|
+			node.vm.box = "ubuntu/bionic64"
+			node.vm.network "private_network", ip: attrs[:ip]
+			node.vm.hostname = hostname
+			node.vm.provider "virtualbox" do |vbox|
+				vbox.memory = attrs[:memory]
+			end
+
+			if index == MACHINES.size() - 1
+				node.vm.provision "ansible" do |ansible|
+					ansible.limit = "all"
+					ansible.playbook = "ansible/site.yml"
+					ansible.groups = {
+						masters: ["node01"],
+						workers: ["node02", "node03", "node04"]
+					}
+					ansible.host_vars = {
+						node01: {
+							k8s_listen_address: MACHINES[:node01][:ip]
+						}
+					}
+					ansible.raw_arguments = ENV['ANSIBLE_ARGS']
+					ansible.extra_vars = {
+						ansible_python_interpreter: "/usr/bin/python3"
+					}
+				end
+			end
+		end
+	end
+end
+

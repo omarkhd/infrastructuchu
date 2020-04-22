@@ -1,0 +1,13 @@
+---
+- hosts: all
+  become: yes
+  gather_facts: yes
+  roles:
+    - common/system
+
+- hosts: masters:workers
+  become: yes
+  gather_facts: yes
+  roles:
+    - common/docker
+    - kubernetes

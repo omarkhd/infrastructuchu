@@ -1,0 +1,169 @@
+---
+- name: add apt key
+  apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    state: present
+  tags: [kubernetes]
+
+- name: add apt repository
+  apt_repository:
+    # Need to update this when bionic is available.
+    repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
+    state: present
+  tags: [kubernetes]
+
+- name: install kubelet
+  apt:
+    name: kubelet={{ version }}
+    state: present
+    update_cache: yes
+  tags: [kubernetes, kubelet]
+
+- name: kubeadm installation
+  tags: [kubernetes]
+  block:
+    - name: add the br_netfilter module
+      modprobe:
+        name: br_netfilter
+        state: present
+
+    - name: set required sysctl entries
+      sysctl:
+        name: "{{ item }}"
+        value: "1"
+        sysctl_set: yes
+        reload: yes
+      loop:
+        - net.bridge.bridge-nf-call-ip6tables
+        - net.bridge.bridge-nf-call-iptables
+        - net.ipv4.ip_forward
+
+    - name: install kubeadm package
+      apt:
+        name: kubeadm={{ version }}
+        state: present
+
+- name: setup master node
+  when: "'masters' in group_names"
+  tags: [kubernetes]
+  block:
+    - name: install kubectl
+      apt:
+        name: kubectl={{ version }}
+        state: present
+
+    - name: initialize the cluster
+      shell: >
+        kubeadm init --pod-network-cidr=10.244.0.0/16
+        --apiserver-advertise-address={{ k8s_listen_address }}
+        >> {{ bucket_dir }}/kubeadm_init.txt
+      args:
+        chdir: $HOME
+        creates: "{{ bucket_dir }}/kubeadm_init.txt"
+
+    - name: create .kube dir
+      file:
+        path: /home/{{ system_user }}/.kube
+        state: directory
+        owner: "{{ system_user }}"
+        group: "{{ system_user }}"
+        mode: "0700"
+
+    - name: copy admin.conf file
+      copy:
+        src: /etc/kubernetes/admin.conf
+        dest: "{{ item }}"
+        owner: "{{ system_user }}"
+        group: "{{ system_user }}"
+        remote_src: yes
+      loop:
+        - /home/{{ system_user }}/.kube/config
+        - "{{ bucket_dir }}/config"
+
+- name: deploy pod network
+  when: "'masters' in group_names"
+  tags: [kubernetes]
+  block:
+    - name: copy kube-flannel.yml file
+      copy:
+        src: kube-flannel.yml
+        dest: /var/tmp/kube-flannel.yml
+        owner: "{{ system_user }}"
+        group: "{{ system_user }}"
+
+    - name: apply pod network
+      become: yes
+      become_user: "{{ system_user }}"
+      shell: >
+        kubectl apply -f /var/tmp/kube-flannel.yml
+        >> {{ bucket_dir }}/kubectl_apply_flannel.txt
+      args:
+        creates: "{{ bucket_dir }}/kubectl_apply_flannel.txt"
+        chdir: /home/{{ system_user }}
+
+- name: setup cluster membership
+  tags: [kubernetes]
+  block:
+    - name: get raw join command
+      shell: kubeadm token create --print-join-command
+      register: token_create
+      when: "'masters' in group_names"
+
+    - name: save join command
+      copy:
+        dest: "{{ bucket_dir }}/join_command.txt"
+        content: "{{ token_create.stdout }}"
+      when: "'masters' in group_names"
+      run_once: yes
+
+    - name: load join command
+      slurp:
+        src: "{{ bucket_dir }}/join_command.txt"
+      register: join_command
+      when: "'workers' in group_names"
+
+    - name: execute join command
+      shell: >
+        {{ join_command.content | b64decode }}
+        >> {{ bucket_dir }}/node_{{ inventory_hostname }}_join.txt
+      args:
+        chdir: /home/{{ system_user }}
+        creates: "{{ bucket_dir }}/node_{{ inventory_hostname }}_join.txt"
+      when: "'workers' in group_names"
+
+- name: setup web ui dashboard
+  when: "'masters' in group_names"
+  tags: [kubernetes, dashboard]
+  block:
+    - name: render manifest files
+      template:
+        src: dashboard/{{ item }}.yaml.j2
+        dest: /var/tmp/{{ item }}.yaml
+        owner: "{{ system_user }}"
+        group: "{{ system_user }}"
+      loop:
+        - recommended
+        - service-account
+        - cluster-role-binding
+
+    - name: apply dashboard manifests
+      become: yes
+      become_user: "{{ system_user }}"
+      shell: >
+        kubectl apply -f /var/tmp/{{ item }}.yaml
+        >> {{ bucket_dir }}/kubectl_apply_{{ item }}.txt
+      args:
+        creates: "{{ bucket_dir }}/kubectl_apply_{{ item }}.txt"
+        chdir: /home/{{ system_user }}
+      loop:
+        - recommended
+        - service-account
+        - cluster-role-binding
+
+    - name: retrieve login bearer token
+      become: yes
+      become_user: "{{ system_user }}"
+      shell: >
+        kubectl -n kubernetes-dashboard describe secret
+        $(kubectl -n kubernetes-dashboard get secret | grep {{ dashboard_user }} | awk '{print $1}')
+        >> {{ bucket_dir }}/dashboard-bearer-token.txt
