@@ -6,6 +6,7 @@
   apt:
     name: ntp
     state: latest
+    update_cache: yes
   tags: [system]
 
 - name: configure ntp

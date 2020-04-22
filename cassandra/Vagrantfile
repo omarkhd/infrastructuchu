@@ -1,0 +1,47 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+ENV['VAGRANT_DEFAULT_PROVIDER'] = "virtualbox"
+
+MACHINES = {
+	node01: { memory: 1024, ip: "172.24.4.2" },
+	node02: { memory: 1024, ip: "172.24.4.3" },
+	node03: { memory: 1024, ip: "172.24.4.4" }
+}
+
+def ip(hostname)
+	return MACHINES[hostname][:ip]
+end
+
+Vagrant.configure("2") do |config|
+	MACHINES.each_with_index do |(hostname, attrs), index|
+		config.vm.define hostname do |node|
+			node.vm.box = "ubuntu/bionic64"
+			node.vm.network "private_network", ip: attrs[:ip]
+			node.vm.hostname = hostname
+			node.vm.provider "virtualbox" do |vbox|
+				vbox.memory = attrs[:memory]
+			end
+
+			if index == MACHINES.size() - 1
+				node.vm.provision "ansible" do |ansible|
+					ansible.limit = "all"
+					ansible.playbook = "ansible/site.yml"
+					ansible.groups = {
+						"cassandra": ["node01", "node02", "node03"],
+					}
+					ansible.host_vars = {
+						"node01": { "listen_address": ip(:node01) },
+						"node02": { "listen_address": ip(:node02) },
+						"node03": { "listen_address": ip(:node03) },
+					}
+					ansible.extra_vars = {
+						"ansible_python_interpreter": "/usr/bin/python3",
+						"seeds": ip(:node01) + "," + ip(:node02) + "," + ip(:node03)
+					}
+					ansible.raw_arguments = ENV['ANSIBLE_ARGS']
+				end
+			end
+		end
+	end
+end

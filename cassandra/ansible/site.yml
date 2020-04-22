@@ -1,0 +1,12 @@
+---
+- hosts: all
+  become: yes
+  gather_facts: yes
+  roles:
+    - common/system
+
+- hosts: cassandra
+  become: yes
+  gather_facts: yes
+  roles:
+    - cassandra

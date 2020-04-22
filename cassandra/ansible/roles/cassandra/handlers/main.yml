@@ -1,0 +1,32 @@
+---
+- name: stop service
+  service:
+    name: cassandra
+    state: stopped
+  tags: [cassandra]
+
+- name: empty system directory
+  file:
+    path: /var/lib/cassandra/data/system
+    state: absent
+  tags: [cassandra]
+
+- name: recreate system directory
+  file:
+    path: /var/lib/cassandra/data/system
+    state: directory
+    owner: cassandra
+    group: cassandra
+    mode: "0755"
+  tags: [cassandra]
+
+- name: set no auto bootstrap
+  set_fact:
+    auto_bootstrap: !!str false
+  tags: [cassandra]
+
+- name: restart service
+  service:
+    name: cassandra
+    state: restarted
+  tags: [cassandra]

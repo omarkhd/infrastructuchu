@@ -1,0 +1,7 @@
+---
+cluster_name: omarkhd
+seeds: 127.0.0.1
+listen_address: 127.0.0.1
+rpc_address: 127.0.0.1
+endpoint_snitch: GossipingPropertyFileSnitch
+auto_bootstrap: !!str true
