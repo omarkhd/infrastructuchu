@@ -1,0 +1,6 @@
+---
+- hosts: master:slave
+  become: yes
+  gather_facts: yes
+  roles:
+    - mesos

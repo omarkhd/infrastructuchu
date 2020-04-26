@@ -16,4 +16,3 @@
     name: mesos-slave
     state: restarted
   when: "'slave' in group_names"
-

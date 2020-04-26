@@ -4,10 +4,3 @@
   gather_facts: yes
   roles:
     - mesos
-
-#- hosts: master
-#  become: yes
-#  gather_facts: yes
-#  roles:
-#    - mesos
-

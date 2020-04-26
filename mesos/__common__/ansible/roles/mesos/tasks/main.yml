@@ -90,4 +90,3 @@
       belong: yes
   when: "'slave' in group_names"
   tags: [mesos]
-

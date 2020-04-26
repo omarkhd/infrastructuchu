@@ -1,0 +1,59 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+ENV['VAGRANT_DEFAULT_PROVIDER'] = 'virtualbox'
+
+MACHINES = {
+	"node01" => { "memory" => 1024, "cpus" => 2, "ip" => "172.24.2.101" },
+	"node02" => { "memory" => 1024, "cpus" => 2, "ip" => "172.24.2.102" },
+	"node03" => { "memory" => 1024, "cpus" => 2, "ip" => "172.24.2.103" },
+	"node04" => { "memory" => 1024, "cpus" => 2, "ip" => "172.24.2.104" }
+}
+
+MESOS_MASTER_IP = MACHINES["node01"]["ip"]
+
+Vagrant.configure("2") do |config|
+	MACHINES.each_with_index do |(hostname, attrs), index|
+		config.vm.define hostname do |node|
+			node.vm.box = "centos/7"
+			node.vm.network "private_network", ip: attrs["ip"]
+			node.vm.hostname = hostname
+			node.vm.provider "virtualbox" do |vbox|
+				vbox.memory = attrs["memory"]
+				vbox.cpus = attrs["cpus"]
+			end
+
+			if index == MACHINES.length - 1
+				node.vm.provision "ansible" do |ansible|
+					ansible.limit = "all"
+					ansible.playbook = "ansible/site.yml"
+					ansible.groups = {
+						"master": ["node01"],
+						"slave": ["node02", "node03", "node04"],
+						"all:vars" => {
+							"mesos_master_ip": MESOS_MASTER_IP
+						},
+						"master:vars" => {
+							"mesos_quorum": 1
+						}
+					}
+					ansible.host_vars = {
+						"node01" => {
+							"mesos_listen_ip": MESOS_MASTER_IP,
+							"zookeeper_id": 1
+						},
+						"node02" => {
+							"mesos_listen_ip": MACHINES["node02"]["ip"],
+						},
+						"node03" => {
+							"mesos_listen_ip": MACHINES["node03"]["ip"],
+						},
+						"node04" => {
+							"mesos_listen_ip": MACHINES["node04"]["ip"],
+						}
+					}
+				end
+			end
+		end
+	end
+end
