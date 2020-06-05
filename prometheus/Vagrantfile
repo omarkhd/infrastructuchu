@@ -17,6 +17,11 @@ Vagrant.configure("2") do |config|
 				vbox.memory = attrs[:memory]
 			end
 
+			if index == 0
+				# Settings for node01 (Prometheus and Grafana box)
+				node.vm.network "forwarded_port", guest: 3000, host: 3000
+			end
+
 			if index == MACHINES.size - 1
 				config.vm.provision "ansible" do |ansible|
 					ansible.limit = "all"
